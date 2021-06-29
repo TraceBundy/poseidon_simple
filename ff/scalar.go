@@ -1,18 +1,23 @@
 package ff
 
 import (
+	"fmt"
 	"math/big"
+	"strconv"
 )
 
 type Scalar struct {
 	*big.Int
 }
 
-func NewString(s string) *Scalar {
+func NewString(s string) (*Scalar, bool) {
 	l := &Scalar{new(big.Int)}
-	i, _ := new(big.Int).SetString(s, 10)
+	i, res := new(big.Int).SetString(s, 10)
+	if !res {
+		return nil, res
+	}
 	l.SetBytes(i.Bytes())
-	return l
+	return l, res
 }
 func NewBytes(x []byte) *Scalar {
 	l := &Scalar{new(big.Int)}
@@ -31,23 +36,10 @@ func NewBigInt(x *big.Int) *Scalar {
 	return l
 }
 
-
 func (s Scalar) Clone() *Scalar {
 	return &Scalar{
 		new(big.Int).Set(s.Int),
 	}
-}
-func (s *Scalar) Rsh(r *Scalar, i uint) *Scalar {
-	s.Int.Rsh(r.Int, i)
-	return s
-}
-
-func (s *Scalar) Cmp(c *Scalar) int {
-	return s.Int.Cmp(c.Int)
-}
-func (s *Scalar) ModInverse(n *Scalar, p *Scalar) *Scalar {
-	s.Int.ModInverse(n.Int, p.Int)
-	return s
 }
 
 // AddMod computes z = (x + y) % p.
@@ -78,43 +70,36 @@ func (s *Scalar) MulMod(x *Scalar, y *Scalar, p *Scalar) *Scalar {
 
 	return s
 }
-func (s *Scalar)ExpMod(x *Scalar, y *Scalar, p *Scalar) *Scalar  {
-	s.Int.Exp(s.Int, y.Int, p.Int)
+
+// ExpMod computes z = (x ^ y) % p.
+func (s *Scalar) ExpMod(x *Scalar, y *Scalar, p *Scalar) *Scalar {
+	s.Int.Exp(x.Int, y.Int, p.Int)
 	return s
 }
 
-//// invMod computes z = (1/x) % p.
-//func invMod(x *big.Int, p *big.Int) (z *big.Int) {
-//	z = new(big.Int).ModInverse(x, p)
-//	return z
-//}
-
-// ExpMod computes z = (x^e) % p.
-func ExpMod(x *Scalar, y *Scalar, p *Scalar) *Scalar {
-	z := new(big.Int).Exp(x.Int, y.Int, p.Int)
-	return &Scalar{
-		z,
-	}
+func (s *Scalar) InField(modulus *Scalar)bool  {
+	return s.Cmp(modulus.Int) == -1
 }
 
-// SqrtMod computes z = sqrt(x) % p.
-func SqrtMod(x *Scalar, p *Scalar) (z *Scalar) {
-	/* assert that p % 4 == 3 */
-	if new(big.Int).Mod(p.Int, big.NewInt(4)).Cmp(big.NewInt(3)) != 0 {
-		panic("p is not equal to 3 mod 4!")
+func (s *Scalar) MarshalJSON() ([]byte, error)  {
+	if s == nil || s.Int == nil {
+		return []byte(fmt.Sprintf(`"%s"`,"null")), nil
 	}
-
-	/* z = sqrt(x) % p = x^((p+1)/4) % p */
-
-	/* e = (p+1)/4 */
-	e := new(big.Int).Add(p.Int, big.NewInt(1))
-	e = e.Rsh(e, 2)
-
-	z = ExpMod(x, &Scalar{e}, p)
-	return z
+	return []byte(fmt.Sprintf(`"%s"`,s.String())), nil
 }
 
-func (s *Scalar) ModSqrt(x *Scalar, p *Scalar) *Scalar {
-	s.Int.ModSqrt(x.Int, p.Int)
-	return s
+func (s *Scalar) UnmarshalJSON(data []byte) error {
+	num , err := strconv.Unquote(string(data))
+	if err != nil {
+		return err
+	}
+	if num == "null" {
+		return nil
+	}
+	n, res := new(big.Int).SetString(num, 10)
+	if !res {
+		return fmt.Errorf("not a decimal number")
+	}
+	s.Int = n
+	return nil
 }

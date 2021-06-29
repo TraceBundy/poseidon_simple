@@ -1,63 +1,23 @@
 package constants
 
-
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/PlatONnetwork/poseidon/ff"
-	"math/big"
 )
-
-type constantsJson struct {
-	C [][]string
-	M [][][]string
-}
-
 
 
 var (
-	Modulus = ff.NewString("21888242871839275222246405745257275088548364400416034343698204186575808495617")
+	Modulus, _ = ff.NewString("21888242871839275222246405745257275088548364400416034343698204186575808495617")
 	C       *Constants
 )
 
 func init() {
-	C = &Constants{
-		C: [][]*ff.Scalar{},
-		M: [][][]*ff.Scalar{},
-	}
-
-	var cs constantsJson
-	err := json.Unmarshal(jsonRaw, &cs)
+	var c Constants
+	err := json.Unmarshal(jsonRaw, &c)
 	if err != nil {
-		panic(err)
+		panic("error parsing poseidon constants")
 	}
-	for i := 0; i < len(cs.C); i++ {
-		var cci []*ff.Scalar
-		for j := 0; j < len(cs.C[i]); j++ {
-			b, ok := new(big.Int).SetString(cs.C[i][j], 10)
-			if !ok {
-				panic(fmt.Errorf("error parsing constants"))
-			}
-			cci = append(cci, ff.NewBigInt(b))
-		}
-		C.C = append(C.C, cci)
-	}
-
-	for i := 0; i < len(cs.M); i++ {
-		var cmi [][]*ff.Scalar
-		for j := 0; j < len(cs.M[i]); j++ {
-			var cmij []*ff.Scalar
-			for k := 0; k < len(cs.M[i][j]); k++ {
-				b, ok := new(big.Int).SetString(cs.M[i][j][k], 10)
-				if !ok {
-					panic(fmt.Errorf("error parsing constants"))
-				}
-				cmij = append(cmij, ff.NewBigInt(b))
-			}
-			cmi = append(cmi, cmij)
-		}
-		C.M = append(C.M, cmi)
-	}
+	C = &c
 }
 
 var jsonRaw = []byte(`{
