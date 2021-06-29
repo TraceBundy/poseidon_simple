@@ -27,7 +27,7 @@ func main()  {
 	fmt.Println(hex.EncodeToString(hash))
 }
 ```
-```
+
 
 ## Licensing
 
