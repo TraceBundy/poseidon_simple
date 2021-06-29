@@ -8,12 +8,14 @@ Reference implementation for the Poseidon Hashing algorithm.
 
 [Starkad and Poseidon: New Hash Functions for Zero Knowledge Proof Systems](https://eprint.iacr.org/2019/458.pdf)
 
+[Reference Implementations for Various Versions of Starkad and Poseidon](https://extgit.iaik.tugraz.at/krypto/hadeshash)
+
 This repository has been created so there's a unique library that holds the tools & functions
 required to perform Poseidon Hashes.
 
 ## Usage
 
-```bigquery
+```Go
 func main()  {
 	inputs := []*ff.Scalar{ff.NewInt(0), ff.NewInt(1)}
 	p, err := NewRate(len(inputs))
