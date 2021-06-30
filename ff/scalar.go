@@ -81,6 +81,13 @@ func (s *Scalar) InField(modulus *Scalar)bool  {
 	return s.Cmp(modulus.Int) == -1
 }
 
+func (s *Scalar) Bytes()[]byte  {
+	var buf [32]byte
+	b := s.Int.Bytes()
+	copy(buf[32-len(b):], b)
+	return buf[:]
+}
+
 func (s *Scalar) MarshalJSON() ([]byte, error)  {
 	if s == nil || s.Int == nil {
 		return []byte(fmt.Sprintf(`"%s"`,"null")), nil

@@ -1,4 +1,4 @@
-package poseidon_simple
+package poseidon
 
 import (
 	"errors"
@@ -89,7 +89,7 @@ func (p Poseidon) BlockSize() int {
 
 // Sum will compute the Poseidon digest value. The usage of the bytes parameter is currently not implemented
 func (p *Poseidon) Sum(in []byte) []byte {
-	p.Pad()
+	p.pad()
 
 	keysOffset := 0
 
@@ -105,11 +105,12 @@ func (p *Poseidon) Sum(in []byte) []byte {
 	for i := 0; i < halfOfFullRound; i++ {
 		p.applyFullRound(&keysOffset)
 	}
+
 	return p.input[0].Bytes()
 }
 
-// Pad will fill the input with zeroed scalars until its length equal the parametrization width
-func (p *Poseidon) Pad() {
+// pad will fill the input with zeroed scalars until its length equal the parametrization width
+func (p *Poseidon) pad() {
 	dif := p.params.Width - len(p.input)
 	if dif > 0 {
 		pad := makeArray(dif, ff.NewInt(0))

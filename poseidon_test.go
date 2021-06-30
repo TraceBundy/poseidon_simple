@@ -1,4 +1,4 @@
-package poseidon_simple
+package poseidon
 
 import (
 	"github.com/PlatONnetwork/poseidon/ff"

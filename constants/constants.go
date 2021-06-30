@@ -12,7 +12,7 @@ type Constants struct {
 type Curve int
 
 const (
-	Bn256 Curve = iota
+	Bn256 Curve = iota + 1
 )
 
 
